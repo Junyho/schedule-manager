@@ -7,3 +7,5 @@
 | 선택 일정 조회 | GET    | `/schedules/{scheduleId}` | Path Parameter: scheduleId | id, title, content, name, createdAt, modifiedAt | `200 OK`         |
 | 일정 수정    | PATCH  | `/schedules/{scheduleId}` | title, name, password | id, title, content, name, createdAt, modifiedAt | `200 OK`         |
 | 일정 삭제    | DELETE | `/schedules/{scheduleId}` | password              | 없음                                              | `204 No Content` |
+
+![img.png](img.png)
