@@ -39,24 +39,14 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public List<ScheduleResponse> findByName(String name) {
         List<ScheduleResponse> dtos = new ArrayList<>();
+        List<Schedule> schedules;
 
         if (name == null || name.isBlank()) {
-            List<Schedule> schedules = scheduleRepository.findAll();
-            for (Schedule schedule : schedules) {
-                ScheduleResponse dto = new ScheduleResponse(
-                        schedule.getId(),
-                        schedule.getTitle(),
-                        schedule.getContent(),
-                        schedule.getName(),
-                        schedule.getCreatedAt(),
-                        schedule.getModifiedAt()
-                );
-                dtos.add(dto);
-            }
-            return dtos;
+            schedules = scheduleRepository.findAllByOrderByModifiedAtDesc();
+        } else {
+            schedules = scheduleRepository.findByNameOrderByModifiedAtDesc(name);
         }
 
-        List<Schedule> schedules = scheduleRepository.findByName(name);
         for (Schedule schedule : schedules) {
             ScheduleResponse dto = new ScheduleResponse(
                     schedule.getId(),
@@ -69,9 +59,7 @@ public class ScheduleService {
             dtos.add(dto);
         }
         return dtos;
-
     }
-
 
     @Transactional
     public ScheduleResponse findOne(Long scheduleId) {
@@ -100,7 +88,7 @@ public class ScheduleService {
 
         schedule.update(request.getTitle(), request.getName());
 
-        Schedule updatedSchedule =  scheduleRepository.save(schedule);
+        Schedule updatedSchedule = scheduleRepository.save(schedule);
 
         return new ScheduleResponse(
                 updatedSchedule.getId(),
