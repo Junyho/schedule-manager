@@ -16,7 +16,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
 
     @Transactional
-    public CreateScheduleResponse save(CreateScheduleRequest request) {
+    public ScheduleResponse save(CreateScheduleRequest request) {
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getContent(),
@@ -24,7 +24,7 @@ public class ScheduleService {
                 request.getPassword()
         );
         Schedule savedSchedule = scheduleRepository.save(schedule);
-        return new CreateScheduleResponse(
+        return new ScheduleResponse(
                 savedSchedule.getId(),
                 savedSchedule.getTitle(),
                 savedSchedule.getContent(),
@@ -35,13 +35,13 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
-    public List<GetScheduleResponse> findByName(String name) {
-        List<GetScheduleResponse> dtos = new ArrayList<>();
+    public List<ScheduleResponse> findByName(String name) {
+        List<ScheduleResponse> dtos = new ArrayList<>();
 
         if (name == null || name.isBlank()) {
             List<Schedule> schedules = scheduleRepository.findAll();
             for (Schedule schedule : schedules) {
-                GetScheduleResponse dto = new GetScheduleResponse(
+                ScheduleResponse dto = new ScheduleResponse(
                         schedule.getId(),
                         schedule.getTitle(),
                         schedule.getContent(),
@@ -56,7 +56,7 @@ public class ScheduleService {
 
         List<Schedule> schedules = scheduleRepository.findByName(name);
         for (Schedule schedule : schedules) {
-            GetScheduleResponse dto = new GetScheduleResponse(
+            ScheduleResponse dto = new ScheduleResponse(
                     schedule.getId(),
                     schedule.getTitle(),
                     schedule.getContent(),
@@ -72,12 +72,12 @@ public class ScheduleService {
 
 
     @Transactional
-    public GetScheduleResponse findOne(Long scheduleId) {
+    public ScheduleResponse findOne(Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("없는 일정입니다.")
         );
 
-        return new GetScheduleResponse(
+        return new ScheduleResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
@@ -88,7 +88,7 @@ public class ScheduleService {
     }
 
     @Transactional
-    public UpdateScheduleResponse update(UpdateScheduleRequest request, Long scheduleId) {
+    public ScheduleResponse update(UpdateScheduleRequest request, Long scheduleId) {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("없는 일정입니다.")
         );
@@ -97,7 +97,7 @@ public class ScheduleService {
             throw new IllegalStateException("비밀번호가 틀립니다.");
         }
         schedule.update(request.getTitle(), request.getName());
-        return new UpdateScheduleResponse(
+        return new ScheduleResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContent(),
