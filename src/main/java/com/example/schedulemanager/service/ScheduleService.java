@@ -93,12 +93,10 @@ public class ScheduleService {
 
         Schedule schedule = getOrThrow(scheduleId);
 
-        if (!request.getPassword().equals(schedule.getPassword())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "비밀번호가 틀립니다."
-            );
-        }
+        validatePassword(
+                request.getPassword(),
+                schedule.getPassword()
+        );
 
         schedule.update(request.getTitle(), request.getName());
 
@@ -119,12 +117,10 @@ public class ScheduleService {
 
         Schedule schedule = getOrThrow(scheduleId);
 
-        if (!request.getPassword().equals(schedule.getPassword())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "비밀번호가 틀립니다."
-            );
-        }
+        validatePassword(
+                request.getPassword(),
+                schedule.getPassword()
+        );
 
         scheduleRepository.deleteById(scheduleId);
     }
@@ -136,5 +132,14 @@ public class ScheduleService {
                         "없는 일정입니다."
                 )
         );
+    }
+
+    private void validatePassword(String requestPassword, String savedPassword) {
+        if (!requestPassword.equals(savedPassword)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "비밀번호가 틀립니다."
+            );
+        }
     }
 }
