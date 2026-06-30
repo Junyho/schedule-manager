@@ -4,8 +4,10 @@ import com.example.schedulemanager.dto.*;
 import com.example.schedulemanager.entity.Schedule;
 import com.example.schedulemanager.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +75,8 @@ public class ScheduleService {
 
     @Transactional
     public ScheduleResponse findOne(Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 일정입니다.")
-        );
+
+        Schedule schedule = getOrThrow(scheduleId);
 
         return new ScheduleResponse(
                 schedule.getId(),
@@ -89,34 +90,51 @@ public class ScheduleService {
 
     @Transactional
     public ScheduleResponse update(UpdateScheduleRequest request, Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 일정입니다.")
-        );
+
+        Schedule schedule = getOrThrow(scheduleId);
 
         if (!request.getPassword().equals(schedule.getPassword())) {
-            throw new IllegalStateException("비밀번호가 틀립니다.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "비밀번호가 틀립니다."
+            );
         }
+
         schedule.update(request.getTitle(), request.getName());
+
+        Schedule updatedSchedule =  scheduleRepository.save(schedule);
+
         return new ScheduleResponse(
-                schedule.getId(),
-                schedule.getTitle(),
-                schedule.getContent(),
-                schedule.getName(),
-                schedule.getCreatedAt(),
-                schedule.getModifiedAt()
+                updatedSchedule.getId(),
+                updatedSchedule.getTitle(),
+                updatedSchedule.getContent(),
+                updatedSchedule.getName(),
+                updatedSchedule.getCreatedAt(),
+                updatedSchedule.getModifiedAt()
         );
     }
 
     @Transactional
     public void delete(DeleteScheduleRequest request, Long scheduleId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
-                () -> new IllegalStateException("없는 일정입니다.")
-        );
+
+        Schedule schedule = getOrThrow(scheduleId);
 
         if (!request.getPassword().equals(schedule.getPassword())) {
-            throw new IllegalStateException("비밀번호가 틀립니다.");
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "비밀번호가 틀립니다."
+            );
         }
 
         scheduleRepository.deleteById(scheduleId);
+    }
+
+    private Schedule getOrThrow(Long scheduleId) {
+        return scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "없는 일정입니다."
+                )
+        );
     }
 }
